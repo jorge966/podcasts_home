@@ -5,7 +5,6 @@ config = configparser.ConfigParser()
 
 config.read("config.ini")
 
-
 conn = psycopg2.connect(
         host=config['Database']['host'],
         port=config['Database']['port'],
@@ -13,15 +12,11 @@ conn = psycopg2.connect(
         user=config['Database']['user_name'],
         password=config['Database']['password'])
 
-
-
 def create_user_table():
     curr = conn.cursor()
     curr.execute('CREATE TABLE users (id serial PRIMARY KEY, username varchar, password varchar, email varchar);')
     conn.commit()
     curr.close()
-
-
 
 def create_podcast_table():
     curr = conn.cursor()

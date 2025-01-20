@@ -19,6 +19,23 @@ conn = psycopg2.connect(
 def hello_world():
     return 'hello test'
 
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    # Access the post data here, and push this information into the DB.
+    post_data = request.data
+    username = ... 
+    password = ...
+    email = ... 
 
+    sql = """INSERT INTO users VALUES
+                (%s, %s, %s);"""
+    # Get the DB cursor using the conn object. (look to the seeddb.py file for examples)
+
+    # The code below is an example of how to execute the SQL query we created on line 27.
+    curr.execute(sql, (username, password, email)) 
+    conn.commit()
+    curr.close()
+    conn.close()
+    
 if __name__ == '__main__':
     app.run()
