@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,request
 import psycopg2
 import configparser
 
@@ -21,21 +21,47 @@ def hello_world():
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
-    # Access the post data here, and push this information into the DB.
-    post_data = request.data
-    username = ... 
-    password = ...
-    email = ... 
+    curr = conn.cursor()
+    post_data = request.form
 
-    sql = """INSERT INTO users VALUES
-                (%s, %s, %s);"""
-    # Get the DB cursor using the conn object. (look to the seeddb.py file for examples)
+    username = post_data["username"]
+    password = post_data["password"]
+    email = post_data["email"]
 
-    # The code below is an example of how to execute the SQL query we created on line 27.
-    curr.execute(sql, (username, password, email)) 
+    sql = """INSERT INTO users (username, password, email)
+                VALUES (%s,%s,%s)
+                RETURNING id;"""
+
+    curr.execute(sql, (username, password, email))
+    return_id = curr.fetchone()[0]
     conn.commit()
     curr.close()
     conn.close()
-    
+    return {
+        "created_user_id": return_id
+    }
+
+@app.route('/create_podcast', methods=['POST'])
+def create_podcast():
+    curr = conn.cursor()
+    post_data = request.form
+
+    username = post_data["username"]
+    password = post_data["password"]
+    email = post_data["email"]
+
+    sql = """INSERT INTO users (username, password, email)
+                VALUES (%s,%s,%s)
+                RETURNING id;"""
+
+    curr.execute(sql, (username, password, email))
+    return_id = curr.fetchone()[0]
+    conn.commit()
+    curr.close()
+    conn.close()
+    return {
+        "created_user_id": return_id
+    }
 if __name__ == '__main__':
     app.run()
+
