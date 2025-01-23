@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask,request, jsonify
 import psycopg2
 import configparser
 
@@ -86,6 +86,25 @@ def create_episode():
     return {
         "created_episode_id": return_id
     }
+@app.route('/get_user', methods=['GET'])
+def get_user():
+    curr = conn.cursor()
+    args = request.args
+
+    user_name = args.get("username")
+
+
+    sql = """SELECT * FROM users WHERE username=%s;"""
+
+    curr.execute(sql, (user_name,))
+    user = curr.fetchone()
+    conn.commit()
+    curr.close()
+    conn.close()
+    return{
+        "current_user" : user
+    }
+
 
 if __name__ == '__main__':
     app.run()
