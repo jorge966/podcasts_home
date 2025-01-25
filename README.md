@@ -14,8 +14,17 @@
 
 ### Podcasts
 
-TBA
+TO Do:
+
+'/get_podcast' - gets episode by "name"
+
+'/delete_podcast' - deletes podcast
+
 
 ### Episodes
 
-TBA
+To do
+
+'/get_episode' - gets episode by "name"
+
+'/delete_episode' - gets episode by "name"
