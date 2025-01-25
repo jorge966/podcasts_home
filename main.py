@@ -1,6 +1,7 @@
 from flask import Flask,request, jsonify
 import psycopg2
 import configparser
+from db import get_db
 
 config = configparser.ConfigParser()
 
@@ -8,42 +9,18 @@ config.read("config.ini")
 
 app = Flask(__name__)
 
-conn = psycopg2.connect(
-        host=config['Database']['host'],
-        port=config['Database']['port'],
-        database=config['Database']['db_name'],
-        user=config['Database']['user_name'],
-        password=config['Database']['password'])
-
 @app.route('/')
 def hello_world():
     return 'hello test'
 
-@app.route('/create_user', methods=['POST'])
-def create_user():
-    curr = conn.cursor()
-    post_data = request.form
-
-    username = post_data["username"]
-    password = post_data["password"]
-    email = post_data["email"]
-
-    sql = """INSERT INTO users (username, password, email)
-                VALUES (%s,%s,%s)
-                RETURNING id;"""
-
-    curr.execute(sql, (username, password, email))
-    return_id = curr.fetchone()[0]
-    conn.commit()
-    curr.close()
-    conn.close()
-    return {
-        "created_user_id": return_id
-    }
-
+"""
+Podcasts
+"""
 @app.route('/create_podcast', methods=['POST'])
 def create_podcast():
-    curr = conn.cursor()
+    connection = get_db()
+    cursor = connection.cursor()
+    
     post_data = request.form
 
     podcast_name = post_data["podcast_name"]
@@ -54,19 +31,23 @@ def create_podcast():
                 VALUES (%s,%s,%s)
                 RETURNING id;"""
 
-    curr.execute(sql, (podcast_name, rating, genre))
-    return_id = curr.fetchone()[0]
-    conn.commit()
-    curr.close()
-    conn.close()
+    cursor.execute(sql, (podcast_name, rating, genre))
+    return_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
     return {
         "created_podcast_id": return_id
     }
 
-
+"""
+Episodes
+"""
 @app.route('/create_episode', methods=['POST'])
 def create_episode():
-    curr = conn.cursor()
+    connection = get_db()
+    cursor = connection.cursor()
+    
     post_data = request.form
 
     episode_name = post_data["episode_name"]
@@ -78,33 +59,79 @@ def create_episode():
                 VALUES (%s,%s,%s,%s)
                 RETURNING id;"""
 
-    curr.execute(sql, (episode_name, duration, upload_date, location_url))
-    return_id = curr.fetchone()[0]
-    conn.commit()
-    curr.close()
-    conn.close()
+    cursor.execute(sql, (episode_name, duration, upload_date, location_url))
+    return_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
     return {
         "created_episode_id": return_id
     }
+
+"""
+Users
+"""
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    connection = get_db()
+    cursor = connection.cursor()
+
+    post_data = request.form
+
+    username = post_data["username"]
+    password = post_data["password"]
+    email = post_data["email"]
+
+    sql = """INSERT INTO users (username, password, email)
+                VALUES (%s,%s,%s)
+                RETURNING id;"""
+
+    cursor.execute(sql, (username, password, email))
+    return_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
+    return {
+        "created_user_id": return_id
+    }
+
 @app.route('/get_user', methods=['GET'])
 def get_user():
-    curr = conn.cursor()
+    connection = get_db()
+    cursor = connection.cursor()
     args = request.args
 
     user_name = args.get("username")
 
-
     sql = """SELECT * FROM users WHERE username=%s;"""
 
-    curr.execute(sql, (user_name,))
-    user = curr.fetchone()
-    conn.commit()
-    curr.close()
-    conn.close()
+    cursor.execute(sql, (user_name,))
+    user = cursor.fetchone()
+    cursor.close()
+
     return{
         "current_user" : user
     }
 
+@app.route('/delete_user', methods=['DELETE'])
+def delete_user():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    user_name = args.get("username")
+
+    sql = """DELETE FROM users WHERE username=%s
+             RETURNING id;"""
+
+    cursor.execute(sql, (user_name,))
+    deleted_user_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
+    return{
+        "deleted_user_id" : deleted_user_id
+    }
 
 if __name__ == '__main__':
     app.run()
