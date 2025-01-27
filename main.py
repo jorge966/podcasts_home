@@ -39,6 +39,40 @@ def create_podcast():
     return {
         "created_podcast_id": return_id
     }
+@app.route('/get_podcast_by_name', methods=['GET'])
+def get_podcast_by_name():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    podcast_name = args.get("podcast_name")
+
+    sql = """SELECT * FROM podcasts WHERE podcast_name=%s;"""
+
+    cursor.execute(sql, (podcast_name,))
+    current_podcast = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current_podcast" : current_podcast
+    }
+@app.route('/get_podcast_by_genre', methods=['GET'])
+def get_podcast_by_genre():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    podcast_by_genre = args.get("genre")
+
+    sql = """SELECT * FROM podcasts WHERE genre=%s;"""
+
+    cursor.execute(sql, (podcast_by_genre,))
+    current_podcast_genre = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current podcast(s) by genre" : current_podcast_genre
+    }
 
 """
 Episodes
@@ -66,6 +100,24 @@ def create_episode():
 
     return {
         "created_episode_id": return_id
+    }
+
+@app.route('/get_episode', methods=['GET'])
+def get_episode():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    episode_name = args.get("episode_name")
+
+    sql = """SELECT * FROM episodes WHERE episode_name=%s;"""
+
+    cursor.execute(sql, (episode_name,))
+    current_episode = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current_episode" : current_episode
     }
 
 """
