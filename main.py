@@ -74,6 +74,24 @@ def get_podcast_by_genre():
         "current podcast(s) by genre" : current_podcast_genre
     }
 
+@app.route('/get_podcast_by_id', methods=['GET'])
+def get_podcast_by_id():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    podcast_id = args.get("id")
+
+    sql = """SELECT * FROM podcasts WHERE id=%s;"""
+
+    cursor.execute(sql, (podcast_id,))
+    current_id = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current_podcast" : current_id
+    }
+
 """
 Episodes
 """
@@ -118,6 +136,24 @@ def get_episode():
 
     return{
         "current_episode" : current_episode
+    }
+
+@app.route('/get_episode_by_id', methods=['GET'])
+def get_episode_by_id():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    episode_id = args.get("id")
+
+    sql = """SELECT * FROM episodes WHERE id=%s;"""
+
+    cursor.execute(sql, (episode_id,))
+    current_id = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current_episode" : current_id
     }
 
 """
@@ -184,6 +220,25 @@ def delete_user():
     return{
         "deleted_user_id" : deleted_user_id
     }
+
+@app.route('/get_user_by_id', methods=['GET'])
+def get_user_by_id():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    user_id = args.get("id")
+
+    sql = """SELECT * FROM podcasts WHERE id=%s;"""
+
+    cursor.execute(sql, (user_id,))
+    current_id = cursor.fetchone()
+    cursor.close()
+
+    return{
+        "current_user" : current_id
+    }
+
 
 if __name__ == '__main__':
     app.run()
