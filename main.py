@@ -92,6 +92,27 @@ def get_podcast_by_id():
         "current_podcast" : current_id
     }
 
+@app.route('/delete_podcast', methods=['DELETE'])
+def delete_podcast():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    podcast_name = args.get("podcasts")
+
+    sql = """DELETE FROM podcasts WHERE podcast_name=%s
+             RETURNING id;"""
+
+    cursor.execute(sql, (podcast_name,))
+    deleted_podcast_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
+    return{
+        "deleted_episode_id" : deleted_podcast_id
+    }
+
+
 """
 Episodes
 """
@@ -154,6 +175,26 @@ def get_episode_by_id():
 
     return{
         "current_episode" : current_id
+    }
+
+@app.route('/delete_episode', methods=['DELETE'])   #to delete potential duplicates
+def delete_episode():
+    connection = get_db()
+    cursor = connection.cursor()
+    args = request.args
+
+    episode_name = args.get("episodes")
+
+    sql = """DELETE FROM episodes WHERE episode_name=%s
+             RETURNING id;"""
+
+    cursor.execute(sql, (episode_name,))
+    deleted_episode_id = cursor.fetchone()[0]
+    connection.commit()
+    cursor.close()
+
+    return{
+        "deleted_episode_id" : deleted_episode_id
     }
 
 """
