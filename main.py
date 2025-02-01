@@ -270,7 +270,7 @@ def get_user_by_id():
 
     user_id = args.get("id")
 
-    sql = """SELECT * FROM podcasts WHERE id=%s;"""
+    sql = """SELECT * FROM users WHERE id=%s;"""
 
     cursor.execute(sql, (user_id,))
     current_id = cursor.fetchone()
@@ -280,6 +280,42 @@ def get_user_by_id():
         "current_user" : current_id
     }
 
+@app.route('/update_user_by_id', methods=['PUT'])
+def update_user_by_id():
+    connection = get_db()
+    cursor = connection.cursor()
+    post_data = request.form
+
+    user_id = post_data["id"]
+
+
+    sql = """SELECT * FROM users WHERE id=%s;"""
+
+    cursor.execute(sql, (user_id,))
+    current_user = cursor.fetchone()
+    if current_user is None:
+        return {
+            "error": "id not found"
+        }
+    user = {
+        "id":current_user[0], "username":current_user[1],"password":current_user[2],"email":current_user[3]
+    }
+
+    if "username" in post_data:
+        user["username"] = post_data["username"]
+    if "password" in post_data:
+        user["password"] = post_data["password"]
+    if "email" in post_data:
+        user["email"] = post_data["email"]
+
+    update_sql = """UPDATE users
+                    SET username=%s, password=%s, email=%s
+                    WHERE id=%s;"""
+    cursor.execute(update_sql,(user["username"],user["password"],user["email"],user_id))
+    connection.commit()
+    cursor.close()
+
+    return user
 
 if __name__ == '__main__':
     app.run()
