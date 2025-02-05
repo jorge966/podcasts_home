@@ -1,3 +1,5 @@
+from os.path import curdir
+
 import psycopg2
 import configparser
 
@@ -30,8 +32,15 @@ def create_episode_table():
     conn.commit()
     curr.close()
 
-create_user_table()
-create_episode_table()
-create_podcast_table()
+def create_podcast_episode_lookup_table():
+    curr = conn.cursor()
+    curr.execute('CREATE TABLE podcast_episodes (id serial PRIMARY KEY, podcast_id int, episode_id int)')
+    conn.commit()
+    curr.close()
+
+# create_user_table()
+# create_episode_table()
+# create_podcast_table()
+create_podcast_episode_lookup_table()
 
 conn.close()

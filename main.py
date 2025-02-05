@@ -1,7 +1,10 @@
+from dbm import error
+
 from flask import Flask,request, jsonify
 import psycopg2
 import configparser
 from db import get_db
+from services import podcasts
 
 config = configparser.ConfigParser()
 
@@ -18,27 +21,13 @@ Podcasts
 """
 @app.route('/create_podcast', methods=['POST'])
 def create_podcast():
-    connection = get_db()
-    cursor = connection.cursor()
-    
     post_data = request.form
-
-    podcast_name = post_data["podcast_name"]
-    rating = post_data["rating"]
-    genre = post_data["genre"]
-
-    sql = """INSERT INTO podcasts (podcast_name, rating, genre)
-                VALUES (%s,%s,%s)
-                RETURNING id;"""
-
-    cursor.execute(sql, (podcast_name, rating, genre))
-    return_id = cursor.fetchone()[0]
-    connection.commit()
-    cursor.close()
+    response = podcasts.create_podcast(post_data)
 
     return {
-        "created_podcast_id": return_id
+        "created_podcast_id": response
     }
+
 @app.route('/get_podcast_by_name', methods=['GET'])
 def get_podcast_by_name():
     connection = get_db()
@@ -112,33 +101,40 @@ def delete_podcast():
         "deleted_episode_id" : deleted_podcast_id
     }
 
+@app.route('/get_podcast_episodes', methods=['GET'])
+def get_podcast_episodes():
+
+    args = request.args
+
+    podcast_id = args.get("id")
+    response = podcasts.get_podcast_episodes(int(podcast_id))
+
+    return response
 
 """
 Episodes
 """
 @app.route('/create_episode', methods=['POST'])
 def create_episode():
-    connection = get_db()
-    cursor = connection.cursor()
+
     
     post_data = request.form
+    podcast_id = post_data.get("podcast_id", None)
+    if podcast_id is None:
+        return  {
+            "Error": "Podcast Id not found"
+        }
+    elif podcast_id.isdigit():
+        podcast_id = int(podcast_id)
+    else:
+        return {
+            "Error": "Podcast Id is invalid"
+        }
 
-    episode_name = post_data["episode_name"]
-    duration = post_data["duration"]
-    upload_date = post_data["upload_date"]
-    location_url = post_data["location_url"]
-
-    sql = """INSERT INTO episodes (episode_name, duration, upload_date, location_url)
-                VALUES (%s,%s,%s,%s)
-                RETURNING id;"""
-
-    cursor.execute(sql, (episode_name, duration, upload_date, location_url))
-    return_id = cursor.fetchone()[0]
-    connection.commit()
-    cursor.close()
+    response = podcasts.add_to_podcast(post_data,podcast_id)
 
     return {
-        "created_episode_id": return_id
+        "created_episode_id": response
     }
 
 @app.route('/get_episode', methods=['GET'])
