@@ -1,6 +1,7 @@
-from dbm import error
+
 
 from flask import Flask,request, jsonify
+from flask_cors import CORS
 import psycopg2
 import configparser
 from db import get_db
@@ -11,6 +12,7 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def hello_world():
@@ -312,6 +314,33 @@ def update_user_by_id():
     cursor.close()
 
     return user
+
+@app.route('/get_all_users', methods=['GET'])
+def get_all_users():
+    connection = get_db()
+    cursor = connection.cursor()
+
+    sql = """SELECT id,username,email FROM users;"""
+
+    user_info = []
+
+    cursor.execute(sql)
+    users = cursor.fetchall()
+
+    for x in users:
+        id = x[0]
+        username = x[1]
+        email = x[2]
+        user = {
+            "id": id, "username":username, "email":email
+        }
+        user_info.append(user)
+
+
+    cursor.close()
+    response = jsonify(user_info)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 if __name__ == '__main__':
     app.run()

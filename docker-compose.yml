@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:14-alpine
@@ -11,3 +9,15 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=admin
       - POSTGRES_DB=default
+#  frontend:
+#    container_name: frontendpodcast
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    profiles: [ "frontend", "dev" ]
+#    image: react
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./frontend:/app
+#      - /app/node_modules
